@@ -1,0 +1,171 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Shuffle</title>
+
+  <style>
+    html,
+    body,
+    div,
+    input,
+    label,
+    button {
+      margin: 0;
+      padding: 0;
+      border: 0;
+      font-size: 100%;
+      font: inherit;
+      vertical-align: middle;
+      text-align: center;
+      user-select: none;
+    }
+
+    body {
+      background-color: #333;
+      color: #ccc;
+      font-family: sans-serif;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    input {
+      opacity: 0;
+      position: fixed;
+      width: 0;
+    }
+
+    label {
+      display: inline-block;
+      width: 25vw;
+      height: 10vh;
+      line-height: 10vh;
+      font-size: 5vh;
+      background-color: #333;
+      color: #ccc;
+    }
+
+    input:checked+label {
+      background-color: #444;
+    }
+
+    input:hover+label {
+      background-color: #555;
+    }
+
+    span {
+      display: inline-block;
+      width: 50vw;
+      height: 16vh;
+      line-height: 16vh;
+      font-size: 10vh;
+      background-color: #666;
+      color: #222;
+    }
+
+    span:nth-child(odd) {
+      background-color: #777;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container"></div>
+
+  <script>
+    window.onload = (event) => {
+      var container = document.getElementById("container");
+
+      let order = [];
+      for (var i = 0; i < 40; i++) {
+        order.push(i);
+      }
+      for (var i = order.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = order[i];
+        order[i] = order[j];
+        order[j] = tmp;
+      }
+
+      var groups = [];
+      for (var i = 0; i < 8; i++) {
+        groups.push([]);
+      }
+
+      var piles = [];
+      for (var i = 0; i < 40; i++) {
+        var value = order[i];
+        var pile = Math.floor(value / 5);
+        piles.push(pile + 1);
+        groups[pile].push([value, groups[pile].length + 1]);
+      }
+
+      for (var i = 0; i < 8; i++) {
+        groups[i].sort((a, b) => a[0] - b[0]);
+      }
+
+      function selectPile(index) {
+        for (var i = 0; i < 10; i++) {
+          var j = 10 * index + i;
+          document.getElementById("span" + i).innerText = "" + piles[j];
+        }
+      }
+
+      function selectGroup(index) {
+        for (var i = 0; i < 5; i++) {
+          document.getElementById("span" + (2 * i)).innerText = "" + groups[2 * index][i][1];
+        }
+        for (var i = 0; i < 5; i++) {
+          document.getElementById("span" + (2 * i + 1)).innerText = "" + groups[2 * index + 1][i][1];
+        }
+      }
+
+      function refresh() {
+        var button = document.querySelectorAll("input:checked")[0];
+        var index = parseInt(button.id[button.id.length - 1]);
+        if (index < 4) {
+          selectPile(index);
+        } else {
+          selectGroup(index - 4);
+        }
+      }
+
+      for (var i = 0; i < 8; i++) {
+        // make button
+        var button = document.createElement("input");
+        button.setAttribute("type", "radio");
+        button.setAttribute("name", "step");
+        if (i == 0) {
+          button.setAttribute("checked", "checked");
+        }
+        button.id = "button" + i;
+        button.onclick = function (event) { refresh(); };
+        container.appendChild(button);
+
+        // make label for button
+        var label = document.createElement("label");
+        label.setAttribute("for", button.id);
+        if (i < 4) {
+          label.innerText = "" + (i + 1) + "0";
+        } else {
+          var index = (i - 4);
+          label.innerText = "" + (2 * index + 1) + (2 * index + 2);
+        }
+        container.appendChild(label);
+      }
+
+      // make display
+      for (var i = 0; i < 10; i++) {
+        var text = document.createElement("span");
+        text.id = "span" + i;
+        text.innerText = "0";
+        container.appendChild(text);
+      }
+
+      selectPile(0);
+    };
+  </script>
+</body>
+
+</html>
